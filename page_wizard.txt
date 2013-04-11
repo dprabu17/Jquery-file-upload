@@ -1,0 +1,498 @@
+<header>
+    <%= render :partial => 'header' %>
+</header>
+
+<section class="app-settings">
+	
+	<ul class="app-settings-nav">
+        <li>
+            <a href="#" class="active">Customize</a>
+        </li>
+        
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        
+        <li>
+            <a href="/add_domain/<%= @site.id %>">Add your domain</a>
+        </li>
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        <li>
+            <a href="/social_share/<%= @site.id %>">Share your site</a>
+        </li>
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        <li>
+            <a href="/google_analytics/<%= @site.id %>">Google analytics</a>
+        </li>
+    </ul>
+    <div style="display: inline; position: absolute; right: 0; width: 197px; top:65px;">
+     <a href="#" class="button show-hide">
+            Show/Hide Options
+            <i class="icon-chevron-up top"></i>
+            <i class="icon-chevron-up bottom"></i>
+        </a>
+    </div>   
+	<div id="tabs" >
+		<nav class="tabs" >
+	        <ul>
+	            	<li><a id="title_link" href="#tabs-1" class="active">Title</a></li>
+					<li><a id="logo_link" href="#tabs-2">Logo</a></li>
+					<% req_url = url_for(:action => "edit_site_css", :site_id => params[:site_id] )%>
+					<% req_reset_url = url_for(:action => "edit_site_css", :site_id => params[:site_id], :previous_site => true ) %>
+					<li><a id="colors_link" href="#tabs-3">Colors</a></li>
+	        </ul>
+	    </nav>
+	    
+		<!-- <a href="#" class="button show-hide">
+        Show/Hide Options
+        <i class="icon-chevron-up top"></i>
+        <i class="icon-chevron-up bottom"></i>
+    	</a> -->
+    	
+        <div class="app-settings-box" id="tabs-1">
+        	
+            <label class="hide-title">
+                <%= check_box_tag 'hide_site_title', @page_section_params[:hide_site_title] , (@page_section_params[:hide_site_title].eql?("true") ? true : false ) %>Hide site title
+            </label>
+
+            <div class="title-options">
+                <%= text_field_tag("site_title", @page_section_params[:site_title].blank? ? @fb.name : @page_section_params[:site_title]) %>
+
+                <%= hidden_field_tag "id", @page_section.id %>
+                <%= hidden_field_tag "site_id", @site.id %>
+                <a href="#" class="button green" id="title_save" >Save</a><br/><br/>
+                <span id="search_error" class="error"style="display:none; padding: 0px;"> Title cannot be blank</span>
+            </div>
+        </div>
+        <div class="app-settings-box" id="tabs-2">
+            <div class="edit-logo">
+                <div class="thumb" id="site_logo">
+                    <% if @page_section_params[:site_logo].blank? %>
+                        <img src="<%= @picture_url %>" width="160" height="160" alt="" />
+                    <% else %>
+                        <img width="250" src="/images/site_<%= @site.id %>/<%= @page_section_params[:site_logo]%>">
+                    <% end %>
+                </div>
+                
+                <%= form_tag(url_for(:action => 'add_image'), 
+                        :id => 'add_image_form',
+                        :enctype => 'multipart/form-data', :multipart=>true) do %>
+			    	<%= text_field 'image_asset', 'name', :size => [60,40].min, :maxlength => "60", :id => "focus", :style=>"display:none", :value=>"site_logo" %>
+                    <%= text_field 'image_asset', 'image_type', :value=>"Icon",:style=>"display:none"%>
+                    <%= hidden_field_tag "site_site_id", params[:site_id] %>
+                    <%= hidden_field_tag "section_id", @page_section.id %>
+                    <input type="file" id="file" name="image_form_file" size="36" />
+				<% end %>
+                
+                
+                <div class="clear"></div>
+            </div>
+        </div>
+        <div class="app-settings-box step-2-content" id="tabs-3">
+        </div>        
+    </div>
+</section>
+<div class="app-settings hidden" id="app-hidden" style="display: none;">
+	<ul class="app-settings-nav">
+        <li>
+            <a id="customize_link" href="/customize/<%= @site.id %>/true">Customize</a>
+        </li>
+        
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        
+        <li>
+             <a id="go_live_link" href="/add_domain/<%= @site.id %>">Add your domain</a>
+        </li>
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        <li>
+            <a href="/social_share/<%= @site.id %>" >Share your site</a>
+        </li>
+        <li>
+            <i class="icon-chevron-right"></i>
+        </li>
+        <li>
+            <a href="/google_analytics/<%= @site.id %>">Google analytics</a>
+        </li>
+    </ul>
+	        <a href="#" class="button show-hide" id="show-hide">
+        	Show/Hide Options
+        	<i class="icon-chevron-down top"></i>
+        	<i class="icon-chevron-down bottom"></i>
+    	</a>
+    	
+</div>
+<% content_for :page_styles do %>
+  <%= stylesheet_link_tag "jresize-edit", :media => 'screen' %>
+<% end %>
+<% content_for :page_scripts do %>
+  <%= javascript_include_tag 'jresize-edit' %>
+  <script>
+	$("document").ready(function() {
+		<% if params[:show_option]=='true'%>
+			$('section.app-settings').show();
+			$('#app-hidden').find('ul.app-settings-nav').hide();
+	    <% else %>
+	    $('section.app-settings').hide();
+	    $('#app-hidden').show();
+		<%end%>
+		$('.show-hide').click(function(){
+			$('#app-hidden').hide();
+			$('section.app-settings').slideToggle("slow",function(){
+				
+				if($(this).css('display')=='none'){
+					$('#app-hidden').slideDown();
+					$('#app-hidden').find('ul.app-settings-nav').show();
+					
+					}else{
+						$('#app-hidden').find('ul.app-settings-nav').hide();
+						$('#app-hidden').slideUp('fast');
+						//$('#app-hidden').find('#show-hide').find('i').toggleClass('icon-chevron-down icon-chevron-up');
+						
+					}
+				});
+		});
+		$.jResize({
+			 viewPortSizes   : [{'size': '320px','name' :"Mobile View", 'class' : "mobile"},
+			 {'size': '768px','name' :"Tablet View", 'class' : "tablet"},
+			 {'size': '1280px','name' :"Desktop View", 'class' : "desktop"}], // ViewPort Widths
+			 backgroundColor : 'FFF', // HEX Code
+			 fontColor       : '3a3a3a',
+			 load_div : "section#preview"
+		});
+	});
+</script>
+<style>
+	.resizer {
+		margin: 2px auto 0px !important;
+	}
+	
+</style>
+<% end %>
+<section id="preview" class="site-preview full">
+    <div style="display:none" id="preview_url"> <%=@prv_url%> </div>
+<iframe id="web_preview" src="<%=home_path(:reset=>false,:site_id=>params[:site_id])%>" class="preview_iframe" style="width:100%;display:block;border:0;height:1000px;">
+</iframe>
+</section>
+    
+<script>
+
+    /* --------------------------------------------- */
+
+    //function to get the preview of the site into the iframe
+    function update_preview(){
+        console.log("update_preview called");
+        $('#web_preview').attr("src","<%= url_for(:controller => 'public_new_pages', :action => 'test_show_page', :site_id => params[:site_id],:reset => 'false' )%> ");
+    }
+
+    //function to get the preview of the site into the iframe
+    function update_reset_preview(){
+        console.log("update_reset preview called");
+        $('#web_preview').attr("src","<%= url_for(:controller => 'public_new_pages', :action => 'test_show_page', :site_id => params[:site_id], :reset => 'true' )%> ");
+         $('#web_preview').attr("onLoad","update_base_url()");
+    }
+   function update_base_url() 
+   {    
+    preview_url = $.trim($("section#preview div#preview_url").html())           
+        head = $("#web_preview").contents().find("head")        
+         $("<base href= '" +preview_url +"'>").appendTo(head);
+   }
+
+
+    //function to get initialize the minicolors
+    function initMiniColors() {
+        $(".color-picker").miniColors({
+            letterCase: 'uppercase',
+            change: function(hex, rgb) {
+                var id = $(this).attr("id");
+                $(this).attr("style", "background: "+hex);
+                // $("#edit_site_css_submit").click();
+
+                if (id == "style_vars_general_background_color") {
+                    $("#web_preview").contents().find("body").css("background-color",hex);
+                    $("#web_preview").contents().find(".share").css("background-color",hex);
+                }
+                else if (id == "style_vars_general_text_color"){
+                    $("#web_preview").contents().find("body").find("p").css("color",hex);
+                }
+                else if (id == "style_vars_general_title_color"){
+                    $("#web_preview").contents().find("body").find(".text-focus").css("color",hex);
+                }
+                else if (id == "style_vars_general_link_color"){
+                    $("#web_preview").contents().find("section.facebook-page").find("a").css("color",hex);
+                    $("#web_preview").contents().find("section.facebook-albums").find("a").css("color",hex);
+                    $("#web_preview").contents().find("span.time").css("color",hex);
+                }                
+                else if (id == "style_vars_main_navigation_background_color"){
+                    $("#web_preview").contents().find(".navigation").css("background-color",hex);
+
+                    $("#web_preview").contents().find(".dropdown-menu").find("ul").css("background-color",hex);
+                    $("#web_preview").contents().find(".tap-to-call").css("background-color",hex);
+                    $("#web_preview").contents().find(".get-directions").css("background-color",hex);
+                    $("#web_preview").contents().find(".photo-box").css('border', '5px solid rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.3)');
+                    $("#web_preview").contents().find("hr").css('border-bottom', '1px solid rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.2)');
+                    $("#web_preview").contents().find(".motto").css('border-bottom', '1px solid rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.2)');
+                    $("#web_preview").contents().find(".facebook-news .facebook-news-post ").css('border-bottom', '1px solid rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', 0.2)');
+                }
+                else if (id == "style_vars_main_navigation_hover_color"){
+                    var navigation_color = $("#web_preview").contents().find(".navigation").css("background-color");
+                    $("#web_preview").contents().find("ul.clearfix").find("a").hover(
+                        function(){
+                        $(this).css("background-color",hex);
+                        },
+                        function(){
+                            $(this).css("background-color", navigation_color);
+                        }
+
+                    );
+                }
+                else if (id == "style_vars_content_H1_text_color"){
+                    $("#web_preview").contents().find("H1").css("color",hex);
+                }
+                else {
+
+                }                
+            }
+        });
+    }
+    
+    
+    //function to post the site styles form    
+    function post_css(form,url) {
+      var form_params = form.serialize();
+      console.log(url);
+      $.post(url, form_params,
+        function(data) { 
+            //console.log("form submited sucessfully");
+        }
+      );
+    }
+
+    //function to load the edit site css form
+    function load_edit_tools(req_url) {
+      $('.step-2-content').load(req_url, 
+        function() {
+        initMiniColors();
+      });
+    }
+
+    // function get_updated_image(){
+    //     setTimeout(function(){
+    //     var new_image = $('#site_logo').find("img").attr('src')
+    //     $("#web_preview").contents().find("header.container").find("img").attr("src", new_image);
+    //     },2000)
+
+    // }
+
+    function resetColors(){
+            var color_pickers = $("#settings_color").find("input.color-picker");
+            for(i=0; i<color_pickers.length; i++)
+            {
+                console.log(color_pickers);
+                var $vval = color_pickers[i]
+                var v = $vval.value;
+                $vval.setAttribute("style","background: "+v)
+            }
+            update_preview();
+            
+    }
+
+    function resetForm(){
+        $('.step-2-content').load('<%= url_for(:action => "edit_site_css", :site_id => params[:site_id], :previous_site => true ) %>', 
+           function() {
+            initMiniColors();
+            update_reset_preview();
+        });
+    }
+    /* --------------------------------------------- */
+
+    $(window).load(function(){
+        $(".slideshow-thumbs").mCustomScrollbar({
+                    horizontalScroll:true,
+                    scrollButtons:{
+                        enable:false,
+                        scrollType:"pixels",
+                        scrollAmount:116
+                    }
+        });
+
+    });
+    
+    /* --------------------------------------------- */
+
+    $("document").ready(function(){
+    	
+    	$(".tabs li a").click(function(){
+    	$('.tabs li a').removeClass('active');
+    		$(this).addClass("active");
+    		
+    	});
+    	
+     /*   $('#file').live("change",function() {
+            $('#add_image_form').submit();
+            setTimeout(function(){
+            $.ajax({
+                    type: "GET",
+                    beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+                    dataType: "html",
+                    url: "/public_new_pages/get_image",
+                    data: "section_id=<%= @page_section.id%>&site_id=<%= @site.id%>&format=html",
+
+                    success: function(data){
+                        $('#site_logo').html(data);
+                        var new_image = $('#site_logo').find("img").attr('src')
+                        console.log(new_image);
+                        $("#web_preview").contents().find("header.container").find("img").attr("src", new_image);
+                    },
+                    error: function(){
+                    }
+
+                });
+        }, 6000)
+        });
+       */
+       
+        //https://github.com/blueimp/jQuery-File-Upload/wiki/How-to-submit-additional-form-data
+	    $('#add_image_form').fileupload({
+	        dataType: 'json',
+	        beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+	        //formData: {"site_site_id": "", "section_id": "", "image_asset": {"name"=>"site_logo", "image_type"=>"Icon"}},
+	        done: function (e, data) {
+	           alert("done");
+	           console.log(data);
+	        }
+	    });
+        
+        // this function captures the enter key hit by the user and call the proper action
+        $("input#site_title").keypress(function (e) {
+                if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
+                    var site_title = $(this).parent('.title-options').find('input#site_title').val();
+                    $("#web_preview").contents().find("span.text-focus").text(site_title);
+                    return false;
+                } else {
+                    return true;
+                }
+        });
+
+
+        // this function is to submit the title for with ajax
+        $("#title_save").click(function(){
+            var site_title = $(this).parent('.title-options').find('input#site_title').val();
+            var id = $(this).parent('.title-options').find('input#id').val();
+            var site_id = $(this).parent('.title-options').find('input#site_id').val();
+            var is_hide = $('#hide_site_title').val();
+            console.log(is_hide);
+            var data_string = "site_title="+site_title+"&id="+id+"&site_id="+site_id+"&hide_site_title="+is_hide;
+
+            if (site_title == "") {
+                $("span#search_error").show();
+            }
+            else {
+               $("span#search_error").hide();
+               $.ajax({
+                    type: "POST",
+                    beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+                    dataType: "html",
+                    url: "/public_new_pages/add_title",
+                    data: data_string,
+
+                    success: function(data){
+                        update_preview()
+                        console.log("Site name updated sucessfully!");
+                    },
+                    error: function(){
+                    }
+
+                });
+            }
+        });
+
+        $("#hide_site_title").click(function(){
+            if( $(this).is(':checked') ) {
+                var is_hide = true
+                $(this).val("true");
+                console.log("checked");
+                $("#web_preview").contents().find("span.text-focus").css("display","none");
+            }
+            else {
+                var is_hide = false
+                $(this).val("false");
+                console.log("unchecked");
+                $("#web_preview").contents().find("span.text-focus").css("display","");
+            }
+        });
+    
+       //initialize the tabs
+       $("#tabs").tabs();
+
+       $(".ui-tabs-nav").addClass("active");
+
+        //load the edit tool for the site 
+        load_edit_tools('<%= req_url %>'); return false;
+
+        $(".wizard-template").click(function(){
+            var template_name = $(this).attr('site_style');
+
+            $.ajax({
+                type: "PUT",
+                beforeSend: function(xhr){ xhr.setRequestHeader('X-CSRF-Token', $('meta[name="csrf-token"]').attr('content'))},
+                dataType: "html",
+                url: "/public_new_pages/edit_site_style",
+                data: "site_id="+<%= params[:site_id] %>+"&site_style="+template_name,
+
+               success: function(data) {
+                console.log("Site style updated sucessfully!");
+
+               },
+               error:function() {
+               }
+
+            });
+        });
+
+
+
+    });
+</script>
+<script type="text/javascript" >
+
+
+$(window).load(function(){   
+    preview_url = '<%=@prv_url%>';          
+        head = $("#web_preview").contents().find("head")        
+         $("<base href= '" +preview_url +"'>").appendTo(head);
+});
+
+
+$(document).ready(function(){
+
+    mixpanel.track_links('#customize_link', 'Clicked customize in wizard page');
+    mixpanel.track_links('#go_live_link', 'Clicked go live in wizard page');
+    mixpanel.track_links('#title_link', 'Clicked on title tab');
+    mixpanel.track_links('#logo_link', 'Clicked on logo tab');
+    mixpanel.track_links('#colors_link', 'Clicked on colors tab');
+    mixpanel.track("customize site page loaded");
+    
+    jQuery('#tabs').tabs({
+   // preventDefault();
+	fx: { opacity: 'toggle' },
+	select: function(event, ui) {
+		jQuery(this).css('height', jQuery(this).height());
+		jQuery(this).css('overflow', 'hidden');
+	},
+	show: function(event, ui) {
+		jQuery(this).css('height', 'auto');
+		jQuery(this).css('overflow', 'visible');
+	}
+});
+});
+
+
+</script>

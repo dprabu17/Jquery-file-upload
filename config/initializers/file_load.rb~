@@ -1,0 +1,3 @@
+require 'jquery-rails'
+require 'jquery-fileupload-rails'
+Rails.application.config.middleware.use JQuery::FileUpload::Rails::Middleware
